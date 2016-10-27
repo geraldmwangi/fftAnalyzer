@@ -26,24 +26,27 @@ int main(int argc, char *argv[])
 //    wave2.readFile();
 ////    wave2.resample(2);
    // WaveForm sum("/home/gerald/Programming/PolyphonicGuitar/Samples/fret4_6_eb_high_norm.wav");
-   // WaveForm sum("/home/gerald/Programming/PolyphonicGuitar/Samples/fret4_6_eb_sum_norm_eq1k.wav");//=wave+wave2;
+//    WaveForm sum("/home/gerald/Programming/PolyphonicGuitar/Samples/fret4_6_eb_sum_norm_eq1k.wav");//=wave+wave2;
+//    sum.readFile();
 //     WaveForm sum("/home/gerald/Programming/PolyphonicGuitar/Samples/Gerald/fret0_dgbe.wav");
 //     sum.readFile();
+         WaveForm sum("/home/gerald/Programming/PolyphonicGuitar/Samples/Gerald/fret0_dgbe_region.wav");
+         sum.readFile();
+//    WaveForm sum1("/home/gerald/Programming/PolyphonicGuitar/Samples/joeboy/twostring-fret10_eb.wav");
+//    sum1.readFile();
 
-    WaveForm sum1("/home/gerald/Programming/PolyphonicGuitar/Samples/joeboy/twostring-fret10_eb.wav");
-    sum1.readFile();
-
-    WaveForm sum2("/home/gerald/Programming/PolyphonicGuitar/Samples/joeboy/twostring-fret0_eb.wav");
-    sum2.readFile();
-    WaveForm sum;
-    sum=sum1+sum2;
+//    WaveForm sum2("/home/gerald/Programming/PolyphonicGuitar/Samples/joeboy/twostring-fret0_eb.wav");
+//    sum2.readFile();
+//    WaveForm sum;
+//    sum=sum1+sum2;
     //    sum.rectifiy();
-//    sum.resample(1/8);
+//    sum.resample(1/8.0);
+         cout<<"Num samples: "<<sum.getBufferSize()<<endl;
     WaveFormPlot plotwave(sum);
-    float begsec=0.2;
+    float begsec=0;//0.2;
     plotwave.PlotWaveForm(begsec,begsec+0.5);
 
-    FFTAnalysis analysis(sum,512*32);
+    FFTAnalysis analysis(sum,sum.getBufferSize());
     analysis.runAnalysis(begsec);
 
 //    FFTAnalysis analysis1(wave);
@@ -63,17 +66,18 @@ int main(int argc, char *argv[])
     srand(time(0));
     FrequencySieve sievesum(analysis.getPeakFrequencies(),analysis.getPeakFrequencies(),thresh);
     cout<<"Sum Computed F0 "<<sievesum.computedF0()<<endl;
+    sievesum.printInliers();
 
     srand(time(0));
     FrequencySieve sievesum2(sievesum.getOutlierFrequencies(),sievesum.getOutlierFrequencies(),thresh*potfactor);
     cout<<"Sum Computed F0 "<<sievesum2.computedF0()<<endl;
-
+    sievesum2.printInliers();
     srand(time(0));
     FrequencySieve sievesum3(sievesum2.getOutlierFrequencies(),sievesum2.getOutlierFrequencies(),thresh*pow(potfactor,2.0));
     cout<<"Sum Computed F0 "<<sievesum3.computedF0()<<endl;
-
+    sievesum3.printInliers();
     srand(time(0));
     FrequencySieve sievesum4(sievesum3.getOutlierFrequencies(),sievesum3.getOutlierFrequencies(),thresh*pow(potfactor,3.0));
     cout<<"Sum Computed F0 "<<sievesum4.computedF0()<<endl;
-
+    sievesum4.printInliers();
 }

@@ -66,6 +66,7 @@ vector<double> FrequencySieve::errorfunction(pair<int, int> dataid, const vector
 //    else
 //        res.push_back(m_inlierthresh);
     res.push_back((err+err2)/3.0+err3);
+//    res.push_back(err);
 //    res.push_back(err2);
 //    res.push_back(err3);
     return res;///norm;

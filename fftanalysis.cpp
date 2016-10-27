@@ -121,6 +121,8 @@ void FFTAnalysis::computePowerSpectrumPeaks()
 
     powerspec[0]=(real*real);
     medianFilterD(powerspec,size,1,0.001f,&maxval);
+    //    medianFilterD(dat.a,size,1,0.001f,&maxval);
+//        medianFilterD(powerspec,size,1,1,&maxval);
 //    medianFilterD(powerspec,size,5,0.1f,&maxval);
 //    medianFilterD(powerspec,size,5,0.1f,&maxval);
     m_numpeaks=0;
@@ -152,6 +154,7 @@ int FFTAnalysis::Draw(mglGraph *gr)
     mglData ypeak(m_numpeaks);
     float maxval=0;
 
+    float windowfreq=((float)m_multiple)/timebase;
     for(long i=1;i<(size);i++)
     {
 
@@ -163,6 +166,10 @@ int FFTAnalysis::Draw(mglGraph *gr)
 //        real=r2;
 //        imag=im2;
         float val=((real*real+imag*imag));
+        float freq=i/timebase;
+        float diff=freq-round(freq/windowfreq)*windowfreq;
+//        if(diff==0)
+//            val=0;
         dat.a[i]=val;
         maxval=max(maxval,val);
         datpeak.a[i]=0;
@@ -172,8 +179,9 @@ int FFTAnalysis::Draw(mglGraph *gr)
     }
     float real=m_out[0];
 
-    dat.a[0]=(real*real);
+    dat.a[0]=0;//(real*real);
     medianFilterD(dat.a,size,1,0.001f,&maxval);
+//    medianFilterD(dat.a,size,1,1,&maxval);
 //    medianFilterD(dat.a,size,5,0.1f,&maxval);
 //    medianFilterD(dat.a,size,5,0.1f,&maxval);
 //    medianFilterD(dat.a,size,5,0.1,&maxval);
@@ -205,15 +213,19 @@ int FFTAnalysis::Draw(mglGraph *gr)
 FFTAnalysis::FFTAnalysis(WaveForm wave, int frames)
 {
     m_wave=wave;
-    m_out=fftwf_alloc_real(frames);
-    m_in=fftwf_alloc_real(frames);
-    m_plan=fftwf_plan_r2r_1d(frames,m_in,m_out,FFTW_R2HC, FFTW_ESTIMATE);
-    m_frames=frames;
+    m_multiple=64;
+    m_out=fftwf_alloc_real(frames*m_multiple);
+    m_in=fftwf_alloc_real(frames*m_multiple);
+    m_plan=fftwf_plan_r2r_1d(frames*m_multiple,m_in,m_out,FFTW_R2HC, FFTW_ESTIMATE);
+    m_frames=frames*m_multiple;
     m_hann_window  = new float[m_frames];
     double sum = 0.0;
 
     for (uint32_t i = 0; i < m_frames; ++i) {
-        m_hann_window[i] = 0.5f - (0.5f * (float) cos (2.0f * M_PI * (float)i / (float)(m_frames)));
+        float pos=i-frames/2.0;
+        float sd=frames/4.0;
+//        m_hann_window[i] = exp(-pow(pos/sd,2.0)/2.0);//
+        m_hann_window[i]=0.5f - (0.5f * (float) cos (2.0f * M_PI * (float)i / (float)(m_frames)));
         sum += m_hann_window[i];
     }
     const double isum = 2.0 / sum;
@@ -249,8 +261,22 @@ void FFTAnalysis::runAnalysis(float beginSec)
 //    maxval=0;
 //    for(int i=0;i<m_frames;i++)
 //        maxval=max(buf[i+beg],maxval);
+    int actframes=m_frames/m_multiple;
+    int begfr=(m_multiple-1)/2*actframes;
+    int endfr=beg+actframes;
     for(int i=0;i<m_frames;i++)
-        m_in[i]=m_hann_window[i]*buf[i+beg]/maxval;
+    {
+        //if(i>=begfr&&i<endfr)
+        {
+            int pos=i%actframes;
+            float sd=m_frames/300.0f;//+(((float)rand())/RAND_MAX)*100.0;
+            m_in[i]=m_hann_window[i]*(buf[pos+beg])*exp(-(float)i/sd);//+0.1*((float)rand())/RAND_MAX)/maxval;
+        }
+//        else
+//            m_in[i]=0.0;
+//        m_in[i]=buf[pos+beg];
+        //cout<<"in: "<<m_in[i]<<" pos:"<<pos<<endl;
+    }
     fftwf_execute(m_plan);
     computePowerSpectrumPeaks();
     mglQT gr(this,"MathGL examples");
@@ -265,10 +291,10 @@ std::vector<float> FFTAnalysis::getPeakFrequencies()
     computePowerSpectrumPeaks();
     float timebase=m_frames/((float)(m_wave.getSamplerate()));
     for(int i=0;i<m_numpeaks;i++)
-        if(m_peaks[i]/timebase>500)
+//        if(m_peaks[i]/timebase>500)
         {
             res.push_back(m_peaks[i]/timebase);
-           // cout<<"Get freq: "<<m_peaks[i]/timebase<<endl;
+            cout<<"Get freq: "<<m_peaks[i]/timebase<<endl;
         }
     return res;
 }

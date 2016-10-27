@@ -15,6 +15,7 @@ class FFTAnalysis: public mglDraw
     int m_frames;
     int m_peaks[1000];
     int m_numpeaks;
+    int m_multiple;
     float* m_hann_window;
     void medianFilter(float* array, int arraysize, int filtersize, float power);
 public:
