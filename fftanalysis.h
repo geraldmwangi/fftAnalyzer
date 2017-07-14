@@ -17,11 +17,12 @@ class FFTAnalysis: public mglDraw
     int m_numpeaks;
     int m_multiple;
     float* m_hann_window;
+    float m_baseFrequency;
     void medianFilter(float* array, int arraysize, int filtersize, float power);
 public:
     void computePowerSpectrumPeaks();
     int Draw(mglGraph *gr);
-    FFTAnalysis(WaveForm wave,int frames);
+    FFTAnalysis(WaveForm wave,int frames,float baseFrequency);
     ~FFTAnalysis();
     void runAnalysis(float beginSec);
     std::vector<float> getPeakFrequencies();

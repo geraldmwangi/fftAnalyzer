@@ -158,7 +158,12 @@ public:
                         m_inliers=inlier;
                         m_inlierweight=inlierweight;
 
+
                     }
+//                    vector<T> datain;
+//                    for(int din=0;din<m_inliers.size();din++)
+//                        datain.push_back(m_data[m_inliers[din]]);
+//                    m_unknowns=computeParameters(datain,m_numunknowns);
 
                 }
             }

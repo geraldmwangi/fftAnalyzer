@@ -8,11 +8,13 @@ SOURCES += main.cpp \
     waveformplot.cpp \
     fftanalysis.cpp \
     multiRansac.cpp \
-    frequencysieve.cpp
+    frequencysieve.cpp \
+    autocorrelator.cpp
 
 HEADERS += \
     waveform.h \
     waveformplot.h \
     fftanalysis.h \
     multiRansac.hxx \
-    frequencysieve.h
+    frequencysieve.h \
+    autocorrelator.h

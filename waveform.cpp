@@ -28,8 +28,10 @@ WaveForm::WaveForm(string file)
 
 void WaveForm::writeFile(string fname)
 {
-    SndfileHandle outfile(fname,SFM_WRITE);
-//    outfile.
+
+
+    SndfileHandle outfile( fname, SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_FLOAT, 1,m_samplerate );
+    outfile.write(m_buffer,m_buffersize );
 }
 
 void WaveForm::readFile()

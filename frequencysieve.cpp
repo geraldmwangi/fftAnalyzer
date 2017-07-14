@@ -3,7 +3,7 @@
 
 
 FrequencySieve::FrequencySieve(vector<float> freqs, vector<float> amplitudes, double thresh):
-    Ransac(1,0.99,thresh)
+    Ransac(1,0.999,thresh)
 {
     m_freqs=freqs;
     m_amplitudes=amplitudes;
@@ -35,6 +35,8 @@ vector<double> FrequencySieve::errorfunction(pair<int, int> dataid, const vector
 //    double err=fabs(fabs(first-second)-currF0[0]);//+(secondamp>firstamp)?(secondamp-firstamp):0;
 //    if(0)
     double err3=0;
+    bool firstin=false;
+    bool secin=false;
     for(int i=0;i<inliers.size();i++)
     {
         pair<int,int> inpair=m_data[inliers[i]];
@@ -53,6 +55,10 @@ vector<double> FrequencySieve::errorfunction(pair<int, int> dataid, const vector
             err3+=m_inlierthresh*10000;
         if(fabs(fdata2-fin2)<eps&&dataid.second!=inpair.second)
             err3+=m_inlierthresh*10000;
+        if(first==fin1||first==fin2)
+            firstin=true;
+        if(second==fin1||second==fin2)
+            secin=true;
 
 
 
@@ -65,7 +71,12 @@ vector<double> FrequencySieve::errorfunction(pair<int, int> dataid, const vector
 //                fabs(first-mult1*currF0[0])+fabs(second-mult2*currF0[0]))/3.0);
 //    else
 //        res.push_back(m_inlierthresh);
-    res.push_back((err+err2)/3.0+err3);
+    if(firstin&&secin)
+        res.push_back(0);
+    else
+        res.push_back((err+err2)+err3);
+//    if(fabs(first-second)==110.25)
+//        res.push_back(m_inlierthresh*10);
 //    res.push_back(err);
 //    res.push_back(err2);
 //    res.push_back(err3);
@@ -82,13 +93,13 @@ vector<float> FrequencySieve::computeParameters(const vector<pair<int, int> > &d
         freqs.push_back(fabs(m_freqs[data[i].first]-m_freqs[data[i].second]));//freq+=fabs(data[i].first-data[i].second);//min(fabs(data[i].first-data[i].second),freq);
     sort(freqs.begin(),freqs.end());
     double freq=freqs[0];//[freqs.size()/2];
-//    if(freqs.size()>1)
-//    {
-//        if(freqs.size()%2==0)
-//            freq=freqs[(freqs.size())/2.0];
-//        else
-//            freq=freqs[(freqs.size()+1)/2.0];
-//    }
+    if(freqs.size()>1)
+    {
+        if(freqs.size()%2==0)
+            freq=freqs[(freqs.size())/2.0];
+        else
+            freq=freqs[(freqs.size()+1)/2.0];
+    }
     newF0.push_back(freq);
 
     return newF0;
